@@ -16,8 +16,8 @@ class Tile (object):
 
 class SimpleTile (Tile):
 	def __init__(self, number, suit):
-		super().__init__(number, suit)
-		self.kind = 'simple'
+		super().__init__('simple', number, suit)
+		#self.kind = 'simple'
 		
 	def next_tile(self, int_input):
 		assert (int_input < 3 & int_input > 0), "Incorrect Input"

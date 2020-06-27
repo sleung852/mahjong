@@ -1,4 +1,5 @@
 from .mjset import MJSet
+from .tile import *
 
 class FanCalculator (object):
 	def __init__(self):
@@ -16,9 +17,11 @@ class FanCalculator (object):
 		self.chow_com = []
 		unique_tiles = list(set(self.tiles))
 		for unique_tile in unique_tiles:
-			if int(unique_tile[1]) <= 7:
-				tile_b = next_tile(unique_tile)
-				tile_c = next_tile(next_tile(unique_tile))
+			if (unique_tile.number <= 7) & (unique_tile.kind == "simple"):
+				tile_b = SimpleTile(unique_tile.number + 1, unique_tile.suit)
+				tile_c = SimpleTile(unique_tile.number + 2, unique_tile.suit)
+				#tile_b = next_tile(unique_tile)
+				#tile_c = next_tile(next_tile(unique_tile))
 				if (tile_b in self.tiles) & (tile_c in self.tiles):
 					combinations.append([unique_tile, tile_b, tile_c])
 		return self.chow_com
@@ -46,13 +49,13 @@ class FanCalculator (object):
 			raw_tiles = self.tiles.copy()
 			leftover = self.tiles_minus(raw_tiles, comb_a)
 			for comb_b in self.full_com:
-				if tiles_subset_bool(leftover, comb_b):
+				if self.tiles_subset_bool(leftover, comb_b):
 					leftover = self.tiles_minus(leftover, comb_b)
 					for comb_c in self.full_com:
-						if tiles_subset_bool(leftover, comb_c):
+						if self.tiles_subset_bool(leftover, comb_c):
 							leftover = self.tiles_minus(leftover, comb_c)
 							for comb_d in self.full_com:
-								if tiles_subset_bool(leftover, comb_d):
+								if self.tiles_subset_bool(leftover, comb_d):
 									leftover = self.tiles_minus(leftover, comb_d)
 									if leftover[0] == leftover[1]:
 										possible_hands.append([comb_a, comb_b, comb_c, comb_d, leftover])
@@ -300,13 +303,15 @@ class FanCalculator (object):
 	def next_tile(tile):
 		assert tile.kind == "simple", "Wrong Kind"
 		return SimpleTile((tile.number+1), tile.suit)
-		
+	
+	@staticmethod	
 	def tiles_minus(tiles_minuend, tiles_subtrahend):
-		assert(len(tiles_minuend) <= len(tiles_subtrahend)), "len(args) do not make sense"
+		assert(len(tiles_minuend) > len(tiles_subtrahend)), "len(args) do not make sense: {} is greater than {}".format(len(tiles_minuend), len(tiles_subtrahend))
 		for tile_subtrahend in tiles_subtrahend:
 			tiles_minuend.remove(tile_subtrahend)
 		return tiles_minuend
-		
+	
+	@staticmethod
 	def tiles_subset_bool(tiles1, tiles2):
 		"""
 		Return Boolean

@@ -1,4 +1,5 @@
 from .tile import Tile, SimpleTile, HonorTile, BonusTile
+import numpy as np
 
 class MJSet (object):
 	def __init__(self):

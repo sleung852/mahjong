@@ -7,13 +7,15 @@ class Tile (object):
 	def __repr__(self):
 		return (str(self.number) + self.suit)
 		
-	def __eq__(self,other):
+	def __eq__(self, other):
 		return (self.suit == other.suit) & (self.number == other.number)
 		
 	def __ne__(self,other):
 		return (self.suit != other.suit) | (self.number != other.number)
-	
 
+	def __hash__(self):
+		return hash(str(self))
+	
 class SimpleTile (Tile):
 	def __init__(self, number, suit):
 		super().__init__('simple', number, suit)
@@ -21,7 +23,7 @@ class SimpleTile (Tile):
 		
 	def next_tile(self, int_input):
 		assert (int_input < 3 & int_input > 0), "Incorrect Input"
-		pass
+		
 		
 	@classmethod
 	def create_from_str(cls, tilestr):
@@ -41,9 +43,7 @@ class HonorTile (Tile):
 	and Dragons (Red aka. Red Middle, Green aka. Fortune...)
 	"""
 	def __init__(self, suit):
-		super().__init__(suit)
-		self.kind = 'honor'
-		self.number = 0
+		super().__init__('honor', 0, suit)
 		
 	def __repr__(self):
 		return self.suit
@@ -52,6 +52,5 @@ class BonusTile (Tile):
 	"""
 	These are tiles like Flowers and Seasons
 	"""
-	def __init__(self, kind, number, suit):
-		super().__init__(number, suit)
-		self.kind = 'bonus'
+	def __init__(self, number, suit):
+		super().__init__('bonus', number, suit)

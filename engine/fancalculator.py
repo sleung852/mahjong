@@ -20,8 +20,6 @@ class FanCalculator (object):
 			if (unique_tile.number <= 7) & (unique_tile.kind == "simple"):
 				tile_b = SimpleTile(unique_tile.number + 1, unique_tile.suit)
 				tile_c = SimpleTile(unique_tile.number + 2, unique_tile.suit)
-				#tile_b = next_tile(unique_tile)
-				#tile_c = next_tile(next_tile(unique_tile))
 				if (tile_b in self.tiles) & (tile_c in self.tiles):
 					self.chow_com.append([unique_tile, tile_b, tile_c])
 		return self.chow_com
@@ -43,8 +41,9 @@ class FanCalculator (object):
 		self.full_com = self.pong_com + self.chow_com
 		return self.full_com
 		
-	def legitimate_hands(self):
+	def legitimate_hands(self, thirteen=True):
 		possible_hands = []
+		# all normal hands
 		for comb_a in self.full_com:
 			raw_tiles = self.tiles.copy()
 			leftover = self.tiles_minus(raw_tiles, comb_a)
@@ -71,6 +70,11 @@ class FanCalculator (object):
 											#print([comb_a, comb_b, comb_c, comb_d], repeated)
 										if not any(repeateds):
 											possible_hands.append([comb_a, comb_b, comb_c, comb_d, leftover])
+		# special hands
+		if thirteen:
+			raw_tiles = self.tiles.copy()
+			if self.is_thirteenorphans():
+				return 1, [self.tiles]
 		return [len(possible_hands) > 0, possible_hands]
 	
 	def call_tile_to_win(self, available_tiles):
@@ -133,16 +137,17 @@ class FanCalculator (object):
 		Heavenly Hand | Tin Wu
 		Earthly Hand | Dei Wu
 		"""
-		current_hand_summary = self.create_summary(hand_comb)
 		fan = 0
 		reasons = []
-		
 		# unique_combinations
 		if self.is_thirteenorphans():
 			reasons.append('Thirteen Orphans | +13')
 			fan += 13
 			return fan, reasons
-			
+
+		current_hand_summary = self.create_summary(hand_comb)
+		
+		# unique_combinations
 		if self.is_orphan(current_hand_summary, self.tiles):
 			reaons.append('Orphans | +10')
 			fan += 10
@@ -271,7 +276,6 @@ class FanCalculator (object):
 		return hand_summary['combination']['kong'] == 4
 		
 	def is_thirteenorphans(self):
-		print('thirteenorphans - initiated')
 		unique_thirteenorphans = []
 		for honor_suit in self.mjset.honor_suits:
 			unique_thirteenorphans.append(HonorTile(honor_suit))
@@ -284,7 +288,6 @@ class FanCalculator (object):
 		return True
 		
 	def is_mixedorphan(self, hand_summary, thehand):
-		print('is mixed-orphan tested')
 		if self.is_allintripplets(hand_summary):
 			simpletiles = []
 			for tile in list(set(thehand)):

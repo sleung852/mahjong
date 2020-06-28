@@ -23,7 +23,7 @@ class MJSet (object):
 			for num in bonus_numbers:
 				self.tiles.append(BonusTile(num, suit))
 				
-		print('A MJ set is taken out from a box!')
+		print("MJ Set Initiated.\n")
 		
 	def shuffle(self):
 		random.shuffle(self.tiles)

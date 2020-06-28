@@ -38,22 +38,23 @@ supcharmyiu.append(HonorTile.from_str('we'))
 supcharmyiu.append(HonorTile.from_str('n'))
 supcharmyiu.append(HonorTile.from_str('n'))
 
-print(supcharmyiu)
+#print(supcharmyiu)
 
 asetoftiles = FanCalculator()
 
-asetoftiles.tiles = supcharmyiu
+asetoftiles.tiles = onhands
+print(asetoftiles.tiles)
+print()
 
 asetoftiles.all_com()
-
-print(asetoftiles.full_com)
 
 eatable, legit_hands = asetoftiles.legitimate_hands()
 
 if eatable:
-	print('It is a legitimate hand and there is(are) {} possible hand(s)!'.format(len(legit_hands)))
+	print('It is a legitimate hand and there is(are) {} possible hand(s)!\n'.format(len(legit_hands)))
 	for legit_hand in legit_hands:
 		fan, reasons = asetoftiles.handtype_fan_calculator(legit_hand)
-	print('Fan is ', fan)
+	print('Total {} Fan\n'.format(fan))
+	print("The reasons are:")
 	for reason in reasons:
 		print(reason)

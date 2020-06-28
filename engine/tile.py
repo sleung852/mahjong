@@ -26,8 +26,8 @@ class SimpleTile (Tile):
 		
 		
 	@classmethod
-	def create_from_str(cls, tilestr):
-		assert len(tilestr) <= 2, "Incorrect Format"
+	def from_str(cls, tilestr):
+		assert len(tilestr) == 2, "Incorrect Format"
 		char_to_str_suit = {
 			'm': "Man",
 			'c': "Circle",
@@ -47,6 +47,23 @@ class HonorTile (Tile):
 		
 	def __repr__(self):
 		return self.suit
+
+	@classmethod
+	def from_str(cls, tilestr):
+		assert (len(tilestr) == 1) | (len(tilestr) == 2), "Incorrect Format: Wrong Input Format"
+		suitchar = tilestr.lower()
+
+		char_to_str_suit = {
+			'g': "Green",
+			'r': "Red",
+			'wh': "White",
+			'e': "East",
+			's': "South",
+			'we': "West",
+			'n': "North"
+		}
+		assert suitchar in char_to_str_suit.keys(), "Incorrect Format: Wrong Input Format"
+		return cls(char_to_str_suit[suitchar])
 		
 class BonusTile (Tile):
 	"""

@@ -136,18 +136,14 @@ class FanCalculator (object):
 		current_hand_summary = self.create_summary(hand_comb)
 		fan = 0
 		reasons = []
-		tiles = []
-		for comb in hand_comb:
-			for tile in comb:
-				tiles.append(tile)
 		
 		# unique_combinations
-		if self.is_thirteenorphans(tiles):
+		if self.is_thirteenorphans():
 			reasons.append('Thirteen Orphans | +13')
 			fan += 13
 			return fan, reasons
 			
-		if self.is_orphan(current_hand_summary, tiles):
+		if self.is_orphan(current_hand_summary, self.tiles):
 			reaons.append('Orphans | +10')
 			fan += 10
 			return fan, reasons
@@ -159,7 +155,7 @@ class FanCalculator (object):
 			reasons.append('All in Tripplets | +3')
 			fan += 3
 
-		if self.is_mixedorphan(current_hand_summary, tiles):
+		if self.is_mixedorphan(current_hand_summary, self.tiles):
 			reasons.append('Mixed Orphans | +1')
 			fan += 1
 		
@@ -175,12 +171,10 @@ class FanCalculator (object):
 			
 		if self.is_smalldragon(current_hand_summary):
 			reasons.append('Small Dragon | +5')
-			fan += 5
-		
+			fan += 5		
 		elif self.is_greatdragon(current_hand_summary):
 			reasons.append('Great Dragon | +8')
 			fan += 8
-
 		elif self.is_containdragon(hand_comb)[0]:
 			for dragon in self.is_containdragon(hand_comb)[1]:
 				reasons.append('Dragon - {} | +1'.format(dragon))
@@ -188,8 +182,7 @@ class FanCalculator (object):
 		
 		if self.is_smallwinds(current_hand_summary):
 			reasons.append('Small Winds | +10')
-			fan += 10
-			
+			fan += 10			
 		elif self.is_greatwinds(current_hand_summary):
 			reasons.append('Great Winds | + 13')
 			fan += 13
@@ -277,8 +270,8 @@ class FanCalculator (object):
 	def is_allkongs(self, hand_summary):
 		return hand_summary['combination']['kong'] == 4
 		
-	def is_thirteenorphans(self, thehand):
-		print(thehand)
+	def is_thirteenorphans(self):
+		print('thirteenorphans - initiated')
 		unique_thirteenorphans = []
 		for honor_suit in self.mjset.honor_suits:
 			unique_thirteenorphans.append(HonorTile(honor_suit))
@@ -286,7 +279,7 @@ class FanCalculator (object):
 			unique_thirteenorphans.append(SimpleTile(number, suit))
 		
 		for tile in unique_thirteenorphans:
-			if tile not in thehand:
+			if tile not in self.tiles:
 				return False
 		return True
 		
@@ -366,8 +359,8 @@ class FanCalculator (object):
 
 	def is_chow(self, comb):
 		for tile_a in comb:
-			tile_b = SimpleTile(unique_tile.number + 1, unique_tile.suit)
-			tile_c = SimpleTile(unique_tile.number + 2, unique_tile.suit)
+			tile_b = SimpleTile(tile_a.number + 1, tile_a.suit)
+			tile_c = SimpleTile(tile_a.number + 2, tile_a.suit)
 			if (tile_b in comb) & (tile_c in comb):
 				return True
 			else:
@@ -387,45 +380,28 @@ class FanCalculator (object):
 	
 	@staticmethod	
 	def tiles_minus(tiles_minuend, tiles_subtrahend):
-		print('large')
-		print(tiles_minuend)
-		print('minusing')
-		print(tiles_subtrahend)
 		assert(len(tiles_minuend) > len(tiles_subtrahend)), "len(args) do not make sense: {} is greater than {}".format(len(tiles_minuend), len(tiles_subtrahend))
 		for tile_subtrahend in tiles_subtrahend:
 			tiles_minuend.remove(tile_subtrahend)
 		return tiles_minuend
-	
+
 	def tiles_subset_bool(self, tiles_minuend, tiles_subtrahend, laststage = False):
-		"""
-		Return Boolean
-		Check whether tiles_subtrahend exist within tiles_minuend
-		"""
-		pong_boolean = True
-		tiles2_a = tiles_subtrahend[0]
+		tiles_minuendx = tiles_minuend.copy()
+		tiles_subtrahendx = tiles_subtrahend.copy()
+		tiles_bool = []
 		for tile in tiles_subtrahend:
-			if tiles2_a != tile:
-				pong_boolean = False
-		if pong_boolean:
-			ok_bool = True
-			tiles1_copy = tiles_minuend.copy()
-			for tile in tiles_subtrahend:
-				if tile in tiles1_copy:
-					tiles1_copy.remove(tile)
-				else:
-					ok_bool*=False
+			#print('removing {} from {}'.format(tile, tiles_minuendx))
+			if tile in tiles_minuendx:
+				tiles_bool.append(True)
+				tiles_minuendx.remove(tile)
+			else:
+				tiles_bool.append(False)
+		if not laststage:
+			return all(tiles_bool)
 		else:
-			ok_bool = all([tile2 in tiles_subtrahend for tile2 in tiles_subtrahend])
-		
-
-		if (not ok_bool) |  (not laststage):
-			return ok_bool
-
-		else:
-			print('laststage used!')
-			eyes = self.tiles_minus(tiles_minuend, tiles_subtrahend)
-			if eyes[0] == eyes[1]:
-				return True
+			tiles_minuend = self.tiles_minus(tiles_minuend, tiles_subtrahend)
+			if tiles_minuend[0] == tiles_minuend[1]:
+				return all(tiles_bool) * True
 			else:
 				return False
 

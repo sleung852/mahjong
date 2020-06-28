@@ -158,6 +158,10 @@ class FanCalculator (object):
 		elif self.is_allintripplets(current_hand_summary):
 			reasons.append('All in Tripplets | +3')
 			fan += 3
+
+		if self.is_mixedorphan(current_hand_summary, tiles):
+			reasons.append('Mixed Orphans | +1')
+			fan += 1
 		
 		if self.is_mixedinonesuit(current_hand_summary):
 			reasons.append('Mixed in One Suit | +3')
@@ -176,6 +180,11 @@ class FanCalculator (object):
 		elif self.is_greatdragon(current_hand_summary):
 			reasons.append('Great Dragon | +8')
 			fan += 8
+
+		elif self.is_containdragon(hand_comb)[0]:
+			for dragon in self.is_containdragon(hand_comb)[1]:
+				reasons.append('Dragon - {} | +1'.format(dragon))
+				fan += 1
 		
 		if self.is_smallwinds(current_hand_summary):
 			reasons.append('Small Winds | +10')
@@ -202,20 +211,22 @@ class FanCalculator (object):
 			
 	def is_mixedinonesuit(self, hand_summary):
 		# checking whether any honor tiles exist
+
 		honor_bool = []
 		for honor_suit in self.mjset.honor_suits:
 			honor_bool.append(hand_summary['suit'][honor_suit]>0)
 		honor_bool = any(honor_bool)
 
 		# if so, check whether there are only one kind of simple suit
-		if honor_bool:
-			for simsuit in self.mjset.simple_suits:
-				simsuit_ex_list = self.mjset.simple_suits.copy()
-				simsuit_ex_list.remove(simsuit)
-				if (hand_summary['suit'][simsuit] > 0) & all(suit == 0 for suit_value in hand_summary['suit'][suit] for suit in simsuit_ex_list) & simsuit == hand_summary['key']:
-					return True
-		return False
-		
+		zerocount = 0
+		for simsuit in self.mjset.simple_suits:
+			if hand_summary['suit'][simsuit] == 0:
+				zerocount += 1
+		if (zerocount == 2) & (honor_bool):
+			return True
+		else:
+			return False
+
 	def is_allonesuit(self, hand_summary):
 		#print("Checking All-One-Suit")
 		for simplesuit in self.mjset.simple_suits:
@@ -280,16 +291,16 @@ class FanCalculator (object):
 		return True
 		
 	def is_mixedorphan(self, hand_summary, thehand):
+		print('is mixed-orphan tested')
 		if self.is_allintripplets(hand_summary):
-			tiles = thehand
-			unique_tiles = list(set(tiles))
-			result = True
-			for tile in unique_tiles:
-				if tile.suit in self.mjset.simple_suits:
-					if not ((tile.number == 1) or (tile.number == 9)):
-						result*=False
-						break
-			return result
+			simpletiles = []
+			for tile in list(set(thehand)):
+				if tile.kind == "Simple":
+					simpletiles.append(tile)
+			for tile in simpletiles:
+				if not ((tile.number == 1) or (tile.number == 9)):
+					return False
+			return True
 		return False
 		
 	def is_orphan(self, hand_summary, thehand):
@@ -306,6 +317,17 @@ class FanCalculator (object):
 					result=False
 					break
 		return False
+
+	def is_containdragon(self, hand_comb):
+		dragon_suits = []
+		for i in range(4):
+			if hand_comb[i][0].suit in self.mjset.honor_suits_dragons:
+				dragon_suits.append(hand_comb[i][0].suit)
+		if len(dragon_suits) > 0:
+			return True, dragon_suits
+		else:
+			return False, None
+
 		
 	def create_summary(self, legal_combs):
 		summary_dict = {}

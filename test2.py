@@ -3,20 +3,20 @@ from engine import *
 onhands = []
 
 onhands.append(SimpleTile(1, 'Man'))
-onhands.append(SimpleTile(1, 'Man'))
-onhands.append(SimpleTile(1, 'Man'))
+onhands.append(SimpleTile(2, 'Man'))
+onhands.append(SimpleTile(3, 'Man'))
 
 onhands.append(HonorTile('North'))
 onhands.append(HonorTile('North'))
 onhands.append(HonorTile('North'))
 
-onhands.append(SimpleTile(3, 'Man'))
-onhands.append(SimpleTile(3, 'Man'))
-onhands.append(SimpleTile(3, 'Man'))
+onhands.append(HonorTile('Red'))
+onhands.append(HonorTile('Red'))
+onhands.append(HonorTile('Red'))
 
-onhands.append(SimpleTile(4, 'Man'))
-onhands.append(SimpleTile(4, 'Man'))
-onhands.append(SimpleTile(4, 'Man'))
+onhands.append(SimpleTile(9, 'Bamboo'))
+onhands.append(SimpleTile(9, 'Bamboo'))
+onhands.append(SimpleTile(9, 'Bamboo'))
 
 onhands.append(SimpleTile(9, 'Man'))
 onhands.append(SimpleTile(9, 'Man'))

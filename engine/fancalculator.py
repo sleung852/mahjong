@@ -23,7 +23,7 @@ class FanCalculator (object):
 				#tile_b = next_tile(unique_tile)
 				#tile_c = next_tile(next_tile(unique_tile))
 				if (tile_b in self.tiles) & (tile_c in self.tiles):
-					combinations.append([unique_tile, tile_b, tile_c])
+					self.chow_com.append([unique_tile, tile_b, tile_c])
 		return self.chow_com
 		
 	def cal_pong_com(self):
@@ -58,7 +58,19 @@ class FanCalculator (object):
 								if self.tiles_subset_bool(leftover, comb_d):
 									leftover = self.tiles_minus(leftover, comb_d)
 									if leftover[0] == leftover[1]:
-										possible_hands.append([comb_a, comb_b, comb_c, comb_d, leftover])
+										repeateds = []
+										for possible_hand in possible_hands:
+											repeated = []
+											comb_ax, comb_bx, comb_cx, comb_dx, leftoverx = possible_hand										
+											for comb in [comb_a, comb_b, comb_c, comb_d]:
+												if comb in [comb_ax, comb_bx, comb_cx, comb_dx]:
+													repeated.append(True)
+												else:
+													repeated.append(False)
+											repeateds.append(all(repeated))
+											#print([comb_a, comb_b, comb_c, comb_d], repeated)
+										if not any(repeateds):
+											possible_hands.append([comb_a, comb_b, comb_c, comb_d, leftover])
 		return [len(possible_hands) > 0, possible_hands]
 	
 	def call_tile_to_win(self, available_tiles):
@@ -73,7 +85,7 @@ class FanCalculator (object):
 				
 		return valid_options
 		
-	def handtype_fan_calculator(self, tiles):
+	def handtype_fan_calculator(self, hand_comb):
 		"""
 		return no. of fans of the winning hand
 		
@@ -121,10 +133,13 @@ class FanCalculator (object):
 		Heavenly Hand | Tin Wu
 		Earthly Hand | Dei Wu
 		"""
-		
-		current_hand_summary = self.create_summary(tiles)
+		current_hand_summary = self.create_summary(hand_comb)
 		fan = 0
 		reasons = []
+		tiles = []
+		for comb in hand_comb:
+			for tile in comb:
+				tiles.append(tile)
 		
 		# unique_combinations
 		if self.is_thirteenorphans(tiles):
@@ -132,7 +147,7 @@ class FanCalculator (object):
 			fan += 13
 			return fan, reasons
 			
-		if self.is_orphan(tiles):
+		if self.is_orphan(current_hand_summary, tiles):
 			reaons.append('Orphans | +10')
 			fan += 10
 			return fan, reasons
@@ -186,50 +201,73 @@ class FanCalculator (object):
 			return False
 			
 	def is_mixedinonesuit(self, hand_summary):
-		honor_bool = any(honor_suit_qt > 0 for honor_suit_qt in summary_dict['suit'][[self.mjset.honor_suits]].values())
+		# checking whether any honor tiles exist
+		honor_bool = []
+		for honor_suit in self.mjset.honor_suits:
+			honor_bool.append(hand_summary['suit'][honor_suit]>0)
+		honor_bool = any(honor_bool)
+
+		# if so, check whether there are only one kind of simple suit
 		if honor_bool:
 			for simsuit in self.mjset.simple_suits:
 				simsuit_ex_list = self.mjset.simple_suits.copy()
 				simsuit_ex_list.remove(simsuit)
-				if (summary_dict['suit'][simsuit] > 0) & all(suit == 0 for suit_value in summary_dict['suit'][suit] for suit in simsuit_ex_list) & simsuit == summary_dict['key']:
+				if (hand_summary['suit'][simsuit] > 0) & all(suit == 0 for suit_value in hand_summary['suit'][suit] for suit in simsuit_ex_list) & simsuit == hand_summary['key']:
 					return True
 		return False
 		
 	def is_allonesuit(self, hand_summary):
-		for suit in summary_dict['suit'][self.mjset.simple_suits.values()]:
-			if (suit == 4) & summary_dict['eye'] == suit:
+		#print("Checking All-One-Suit")
+		for simplesuit in self.mjset.simple_suits:
+			simplecomb_count = hand_summary['suit'][simplesuit]
+			if (simplecomb_count == 4) & (hand_summary['eye'] == simplesuit):
 				return True
 		return False
 		
 	def is_allhonortiles(self, hand_summary):
-		return (all(suit_qt == 0 for suit_qt in summary_dict['suit'][self.mjset.simple_suits].values()) & (hand_summary['eyes'] in self.mjset.honor_suits))
+		
+		# firstly if allhonortiles, it must be all tripplets
+		if not self.is_allintripplets(hand_summary):
+			return False
+
+		# create a bool for checking whether there are not simplesuits at all
+		nosimplesuit_bools = []
+		for simplesuit in self.mjset.simple_suits:
+			nosimplesuit_bools.append(hand_summary['suit'][simplesuit] == 0)
+		nosimplesuit_bool = all(nosimplesuit_bools)
+
+		# cross check there is nosimplesuit and the eye is also an honor_suits
+		if nosimplesuit_bool & (hand_summary['eye'] in self.mjset.honor_suits):
+			return True
+		return False
 	
 	def is_smalldragon(self, hand_summary):
 		for dragon in self.mjset.honor_suits_dragons:
-			if (summary_dict['suit'][dragon] == 1) | (summary_dict['eyes'] == dragon):
+			if (hand_summary['suit'][dragon] == 1) | (hand_summary['eye'] == dragon):
 				pass
 			else:
 				return False
 		return True
 		
 	def is_greatdragon(self, hand_summary):
-		return all(summary_dict['suit'][dragon] == 1 for dragon in self.mjset.honor_suits_dragons)
+		return all(hand_summary['suit'][dragon] == 1 for dragon in self.mjset.honor_suits_dragons)
 		
 	def is_smallwinds(self, hand_summary):
 		for wind in self.mjset.honor_suits_winds:
-			if (summary_dict['suit'][wind] == 1) | (summary_dict['eyes'] == wind):
+			if (hand_summary['suit'][wind] == 1) | (hand_summary['eye'] == wind):
 				pass
 			else:
 				return False
 		return True
 		
 	def is_greatwinds(self, hand_summary):
-		return all(summary_dict['suit'][wind] == 1 for wind in self.mjset.honor_suits_winds)		
+		return all(hand_summary['suit'][wind] == 1 for wind in self.mjset.honor_suits_winds)		
 
 	def is_allkongs(self, hand_summary):
-		return summary_dict['combindation']['kong'] == 4
+		return hand_summary['combination']['kong'] == 4
 		
 	def is_thirteenorphans(self, thehand):
+		print(thehand)
 		unique_thirteenorphans = []
 		for honor_suit in self.mjset.honor_suits:
 			unique_thirteenorphans.append(HonorTile(honor_suit))
@@ -237,7 +275,7 @@ class FanCalculator (object):
 			unique_thirteenorphans.append(SimpleTile(number, suit))
 		
 		for tile in unique_thirteenorphans:
-			if tile not in list(set(thehand)):
+			if tile not in thehand:
 				return False
 		return True
 		
@@ -278,26 +316,47 @@ class FanCalculator (object):
 			summary_dict['suit'][suit] = 0
 		for suit in self.mjset.honor_suits:
 			summary_dict['suit'][suit] = 0
+		combs = ['kong', 'pong', 'chow']
 		for comb in combs:
 			summary_dict['combination'][comb] = 0
-			
-		assert len(legal_hand) != 5, "Something is wrong"
+		
+		#print('Creating Hand Summary')
+		#print(legal_combs)
+		assert len(legal_combs) == 5, "Something is wrong"
+		
 		for i in range(0,4):
-			if is_pong(legal_combs[i]):
-				summary_dict['combination']['pong'] += 1
-			elif is_chow(legal_combs[i]):
-				summary_dict['combination']['chow'] += 1
-			elif is_kong(legal_combs[i]):
+			if len(legal_combs[i]) == 4:
 				summary_dict['combination']['kong'] += 1
+			elif self.is_pong(legal_combs[i]):
+				summary_dict['combination']['pong'] += 1
+			elif self.is_chow(legal_combs[i]):
+				summary_dict['combination']['chow'] += 1
 			else:
 				print("Error")
 		
-			for i in range(0,4):
-				summary_dict['suit'][legal_combs[i][0].suit] += 1
+		for i in range(0,4):
+			summary_dict['suit'][legal_combs[i][0].suit] += 1
 			
-		summary_dict['eye'] = legal_hand[4][0].suit
-			
+		summary_dict['eye'] = legal_combs[4][0].suit
+		
+		#print(summary_dict)
 		return summary_dict
+
+	def is_chow(self, comb):
+		for tile_a in comb:
+			tile_b = SimpleTile(unique_tile.number + 1, unique_tile.suit)
+			tile_c = SimpleTile(unique_tile.number + 2, unique_tile.suit)
+			if (tile_b in comb) & (tile_c in comb):
+				return True
+			else:
+				return False
+
+	def is_pong(self, comb):
+		tile_a, tile_b, tile_c = comb
+		return tile_a == tile_b == tile_c
+
+	def is_kong(self, comb):
+		pass
 		
 	@staticmethod
 	def next_tile(tile):
@@ -306,31 +365,46 @@ class FanCalculator (object):
 	
 	@staticmethod	
 	def tiles_minus(tiles_minuend, tiles_subtrahend):
+		print('large')
+		print(tiles_minuend)
+		print('minusing')
+		print(tiles_subtrahend)
 		assert(len(tiles_minuend) > len(tiles_subtrahend)), "len(args) do not make sense: {} is greater than {}".format(len(tiles_minuend), len(tiles_subtrahend))
 		for tile_subtrahend in tiles_subtrahend:
 			tiles_minuend.remove(tile_subtrahend)
 		return tiles_minuend
 	
-	@staticmethod
-	def tiles_subset_bool(tiles1, tiles2):
+	def tiles_subset_bool(self, tiles_minuend, tiles_subtrahend, laststage = False):
 		"""
 		Return Boolean
-		Check whether tiles2 exist within tiles1
+		Check whether tiles_subtrahend exist within tiles_minuend
 		"""
 		pong_boolean = True
-		tiles2_a = tiles2[0]
-		for tile in tiles2:
+		tiles2_a = tiles_subtrahend[0]
+		for tile in tiles_subtrahend:
 			if tiles2_a != tile:
 				pong_boolean = False
 		if pong_boolean:
 			ok_bool = True
-			tiles1_copy = tiles1.copy()
-			for tile in tiles2:
+			tiles1_copy = tiles_minuend.copy()
+			for tile in tiles_subtrahend:
 				if tile in tiles1_copy:
 					tiles1_copy.remove(tile)
 				else:
 					ok_bool*=False
 		else:
-			ok_bool = all([tile2 in tiles2 for tile2 in tiles2])
-		return ok_bool	
+			ok_bool = all([tile2 in tiles_subtrahend for tile2 in tiles_subtrahend])
+		
+
+		if (not ok_bool) |  (not laststage):
+			return ok_bool
+
+		else:
+			print('laststage used!')
+			eyes = self.tiles_minus(tiles_minuend, tiles_subtrahend)
+			if eyes[0] == eyes[1]:
+				return True
+			else:
+				return False
+
 	

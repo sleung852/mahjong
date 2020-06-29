@@ -72,8 +72,6 @@ class FanCalculator (object):
 		    	leftover = self.tiles_minus(handtiles, four_trio_com)
 		    	if leftover[0] == leftover[1]:
 		    		possible_hands.append(list(set_combination_raw) + [leftover])
-		    		print('good: {}'.format(possible_hands))
-
 		# special hands
 		if thirteen:
 			raw_tiles = self.tiles.copy()
@@ -82,18 +80,20 @@ class FanCalculator (object):
 		return [len(possible_hands) > 0, possible_hands]
 	
 	def call_tile_to_win(self, available_tiles):
-		valid_options = []
+		results = []
+		texts=[]
 		
 		options = list(set(available_tiles))
 		for option in options:
 			hidden_tiles_copy = self.tiles.copy()
 			hidden_tiles_copy.append(option)
-			print(hidden_tiles_copy)
-			valid_bool, options = self.legitimate_hands(hiddentiles=hidden_tiles_copy)
-			if valid_bool:
-				valid_options += options
-				
-		return valid_options
+			if self.legitimate_hands(hiddentiles=hidden_tiles_copy)[0]:
+				texts.append('There are only {} {}(s) in the remaining tiles of {}'.format(available_tiles.count(option), option, len(available_tiles)))
+				prob = available_tiles.count(option) / len(available_tiles)
+				results.append([option, prob])
+		for text in texts:
+			print(text)
+		return results
 		
 	def handtype_fan_calculator(self, hand_comb):
 		"""
@@ -389,14 +389,16 @@ class FanCalculator (object):
 	
 	@staticmethod	
 	def tiles_minus(tiles_minuend, tiles_subtrahend):
-		assert(len(tiles_minuend) > len(tiles_subtrahend)), "len(args) do not make sense: {} is greater than {}".format(len(tiles_minuend), len(tiles_subtrahend))
-		print('successfully removing {} from {}'.format(tiles_subtrahend, tiles_minuend))
-		for tile_subtrahend in tiles_subtrahend:
-			tiles_minuend.remove(tile_subtrahend)
-		return tiles_minuend
+		tiles_minuendx = tiles_minuend.copy()
+		tiles_subtrahendx = tiles_subtrahend.copy()
+		assert(len(tiles_minuendx) > len(tiles_subtrahendx)), "len(args) do not make sense: {} is greater than {}".format(len(tiles_minuendx), len(tiles_subtrahendx))
+		#print('successfully removing {} from {}'.format(tiles_subtrahendx, tiles_minuendx))
+		for tile_subtrahend in tiles_subtrahendx:
+			tiles_minuendx.remove(tile_subtrahend)
+		return tiles_minuendx
 
 	def tiles_subset_bool(self, tiles_minuend, tiles_subtrahend, laststage = False):
-		print('tried removing {} from {}'.format(tiles_subtrahend, tiles_minuend))
+		#print('tried removing {} from {}'.format(tiles_subtrahend, tiles_minuend))
 		tiles_minuendx = tiles_minuend.copy()
 		tiles_subtrahendx = tiles_subtrahend.copy()
 		tiles_bool = []

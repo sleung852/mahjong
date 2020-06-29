@@ -2,18 +2,18 @@ from engine import *
 
 chingyatsikpingwu = []
 
-chingyatsikpingwu.append(SimpleTile(2, 'Man'))
-chingyatsikpingwu.append(SimpleTile(3, 'Man'))
-chingyatsikpingwu.append(SimpleTile(4, 'Man'))
+chingyatsikpingwu.append(SimpleTile(1, 'Man'))
+chingyatsikpingwu.append(SimpleTile(1, 'Man'))
 chingyatsikpingwu.append(SimpleTile(1, 'Man'))
 chingyatsikpingwu.append(SimpleTile(2, 'Man'))
 chingyatsikpingwu.append(SimpleTile(3, 'Man'))
 chingyatsikpingwu.append(SimpleTile(4, 'Man'))
 chingyatsikpingwu.append(SimpleTile(5, 'Man'))
 chingyatsikpingwu.append(SimpleTile(6, 'Man'))
-chingyatsikpingwu.append(SimpleTile(2, 'Man'))
-chingyatsikpingwu.append(SimpleTile(3, 'Man'))
-chingyatsikpingwu.append(SimpleTile(4, 'Man'))
+chingyatsikpingwu.append(SimpleTile(7, 'Man'))
+chingyatsikpingwu.append(SimpleTile(8, 'Man'))
+chingyatsikpingwu.append(SimpleTile(9, 'Man'))
+chingyatsikpingwu.append(SimpleTile(9, 'Man'))
 chingyatsikpingwu.append(SimpleTile(9, 'Man'))
 
 calculator = FanCalculator()

@@ -10,12 +10,15 @@ class FanCalculator (object):
 		self.pong_com = []
 		self.full_com = []
 		
-	def cal_chow_com(self):
+	def cal_chow_com(self, hiddentiles=None):
 		"""
 		Calculate all the possible Chow (aka.Sheung) combinations
 		"""
+		if hiddentiles is None:
+			hiddentiles = self.tiles.copy()
+
 		self.chow_com = []
-		unique_tiles = list(set(self.tiles))
+		unique_tiles = list(set(hiddentiles))
 		for unique_tile in unique_tiles:
 			if (unique_tile.number <= 7) & (unique_tile.kind == "simple"):
 				tile_b = SimpleTile(unique_tile.number + 1, unique_tile.suit)
@@ -24,28 +27,43 @@ class FanCalculator (object):
 					self.chow_com.append([unique_tile, tile_b, tile_c])
 		return self.chow_com
 		
-	def cal_pong_com(self):
+	def cal_pong_com(self, hiddentiles=None):
+		if hiddentiles is None:
+			hiddentiles = self.tiles.copy()
+
 		self.pong_com = []
-		unique_tiles = list(set(self.tiles))
+		unique_tiles = list(set(hiddentiles))
 		for unique_tile in unique_tiles:
 			if self.tiles.count(unique_tile) == 3:
 				self.pong_com.append([unique_tile] * 3)
 		return self.pong_com
 				
-	def all_com(self):
+	def all_com(self, hiddentiles=None):
 		"""
 		return all combinations of Pong and Chow
 		"""
-		self.cal_pong_com()
-		self.cal_chow_com()
+		if hiddentiles is None:
+			hiddentiles = self.tiles.copy()
+
+		self.cal_pong_com(hiddentiles)
+		self.cal_chow_com(hiddentiles)
 		self.full_com = self.pong_com + self.chow_com
 		return self.full_com
 		
-	def legitimate_hands(self, thirteen=True):
+	def legitimate_hands(self, hiddentiles=None, thirteen=True):
+		if hiddentiles is None:
+			handtiles = self.tiles.copy()
+		else:
+			handtiles = hiddentiles.copy()
+		self.all_com(hiddentiles=handtiles)
 		possible_hands = []
 		# all normal hands
 		for comb_a in self.full_com:
-			raw_tiles = self.tiles.copy()
+			if hiddentiles is None:
+				raw_tiles = self.tiles.copy()
+			else:
+				raw_tiles = hiddentiles.copy()
+			print('raw tiles: {}'.format(raw_tiles))
 			leftover = self.tiles_minus(raw_tiles, comb_a)
 			for comb_b in self.full_com:
 				if self.tiles_subset_bool(leftover, comb_b):
@@ -84,8 +102,10 @@ class FanCalculator (object):
 		for option in options:
 			hidden_tiles_copy = self.tiles.copy()
 			hidden_tiles_copy.append(option)
-			if len(self.legitimate_hands()) > 0:
-				valid_options.append(option)
+			print(hidden_tiles_copy)
+			valid_bool, options = self.legitimate_hands(hiddentiles=hidden_tiles_copy)
+			if valid_bool:
+				valid_options += options
 				
 		return valid_options
 		
@@ -384,16 +404,17 @@ class FanCalculator (object):
 	@staticmethod	
 	def tiles_minus(tiles_minuend, tiles_subtrahend):
 		assert(len(tiles_minuend) > len(tiles_subtrahend)), "len(args) do not make sense: {} is greater than {}".format(len(tiles_minuend), len(tiles_subtrahend))
+		print('successfully removing {} from {}'.format(tiles_subtrahend, tiles_minuend))
 		for tile_subtrahend in tiles_subtrahend:
 			tiles_minuend.remove(tile_subtrahend)
 		return tiles_minuend
 
 	def tiles_subset_bool(self, tiles_minuend, tiles_subtrahend, laststage = False):
+		print('tried removing {} from {}'.format(tiles_subtrahend, tiles_minuend))
 		tiles_minuendx = tiles_minuend.copy()
 		tiles_subtrahendx = tiles_subtrahend.copy()
 		tiles_bool = []
 		for tile in tiles_subtrahend:
-			#print('removing {} from {}'.format(tile, tiles_minuendx))
 			if tile in tiles_minuendx:
 				tiles_bool.append(True)
 				tiles_minuendx.remove(tile)

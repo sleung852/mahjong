@@ -1,25 +1,21 @@
 from engine import *
 
-onhands = []
+chingyatsikpingwu = []
 
-onhands.append(SimpleTile(2, 'Man'))
-onhands.append(SimpleTile(3, 'Man'))
-onhands.append(SimpleTile(4, 'Man'))
-
-onhands.append(SimpleTile(1, 'Man'))
-onhands.append(SimpleTile(2, 'Man'))
-onhands.append(SimpleTile(3, 'Man'))
-
-onhands.append(SimpleTile(1, 'Man'))
-onhands.append(SimpleTile(2, 'Man'))
-onhands.append(SimpleTile(3, 'Man'))
-
-onhands.append(SimpleTile(2, 'Man'))
-onhands.append(SimpleTile(3, 'Man'))
-onhands.append(SimpleTile(4, 'Man'))
-
-onhands.append(SimpleTile(3, 'Man'))
-onhands.append(SimpleTile(3, 'Man'))
+chingyatsikpingwu.append(SimpleTile(2, 'Man'))
+chingyatsikpingwu.append(SimpleTile(3, 'Man'))
+chingyatsikpingwu.append(SimpleTile(4, 'Man'))
+chingyatsikpingwu.append(SimpleTile(1, 'Man'))
+chingyatsikpingwu.append(SimpleTile(2, 'Man'))
+chingyatsikpingwu.append(SimpleTile(3, 'Man'))
+chingyatsikpingwu.append(SimpleTile(4, 'Man'))
+chingyatsikpingwu.append(SimpleTile(5, 'Man'))
+chingyatsikpingwu.append(SimpleTile(6, 'Man'))
+chingyatsikpingwu.append(SimpleTile(2, 'Man'))
+chingyatsikpingwu.append(SimpleTile(3, 'Man'))
+chingyatsikpingwu.append(SimpleTile(4, 'Man'))
+chingyatsikpingwu.append(SimpleTile(9, 'Man'))
+chingyatsikpingwu.append(SimpleTile(9, 'Man'))
 
 supcharmyiu = []
 
@@ -42,11 +38,11 @@ supcharmyiu.append(HonorTile.from_str('n'))
 
 asetoftiles = FanCalculator()
 
-asetoftiles.tiles = onhands
+asetoftiles.tiles = chingyatsikpingwu
 print(asetoftiles.tiles)
 print()
 
-asetoftiles.all_com()
+print(asetoftiles.all_com())
 
 eatable, legit_hands = asetoftiles.legitimate_hands()
 
@@ -58,3 +54,5 @@ if eatable:
 	print("The reasons are:")
 	for reason in reasons:
 		print(reason)
+else:
+	print('There is no legitimate hand!')

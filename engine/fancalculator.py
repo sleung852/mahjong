@@ -87,10 +87,17 @@ class FanCalculator (object):
 		for option in options:
 			hidden_tiles_copy = self.tiles.copy()
 			hidden_tiles_copy.append(option)
-			if self.legitimate_hands(hiddentiles=hidden_tiles_copy)[0]:
+			legit_bool, legit_hands = self.legitimate_hands(hiddentiles=hidden_tiles_copy)
+			if legit_bool:
 				texts.append('There are only {} {}(s) in the remaining tiles of {}'.format(available_tiles.count(option), option, len(available_tiles)))
+				# so i made an assumption here that there is only one way to 
+				max_fan = 0
+				for i in range(len(legit_hands)):
+					fan, _ = self.handtype_fan_calculator(self.legitimate_hands(hiddentiles=hidden_tiles_copy)[1][i])
+					if fan > max_fan:
+						max_fan = fan
 				prob = available_tiles.count(option) / len(available_tiles)
-				results.append([option, prob])
+				results.append([option, fan, prob])
 		for text in texts:
 			print(text)
 		return results
@@ -346,7 +353,7 @@ class FanCalculator (object):
 		
 		#print('Creating Hand Summary')
 		#print(legal_combs)
-		assert len(legal_combs) == 5, "Something is wrong"
+		assert len(legal_combs) == 5, "len(combinations) should be 5, it is currently {}".format(len(legal_combs))
 		
 		for i in range(0,4):
 			if len(legal_combs[i]) == 4:

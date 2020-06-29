@@ -1,0 +1,13 @@
+def in_sequence_bool(sequence, possible_triplet):
+    """
+    To see whether a set of triplets ie [1,2,3] in contained in the sequence
+    ie. if triplets is [1,2,3], then sequence [4,1,3,2] should return True
+    ie. if triplets is [1,2,3], then sequence [4,1,5,2] should return False
+    """
+    sequencex = sequence.copy()
+    for integer in possible_triplet:
+        if integer in sequencex:
+            sequencex.remove(integer)
+        else:
+            return False
+    return True

@@ -23,4 +23,4 @@ available = calculator.tiles_minus(calculator.mjset.tiles, chingyatsikpingwu)
 
 print(calculator.call_tile_to_win(available))
 
-print(calculator.full_com)
+#print(calculator.full_com)

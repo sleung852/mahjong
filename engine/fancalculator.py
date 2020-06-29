@@ -1,3 +1,5 @@
+import itertools
+
 from .mjset import MJSet
 from .tile import *
 
@@ -49,8 +51,73 @@ class FanCalculator (object):
 		self.cal_chow_com(hiddentiles)
 		self.full_com = self.pong_com + self.chow_com
 		return self.full_com
-		
+
 	def legitimate_hands(self, hiddentiles=None, thirteen=True):
+		if hiddentiles is None:
+			handtiles = self.tiles.copy()
+		else:
+			handtiles = hiddentiles.copy()
+
+		self.all_com(hiddentiles=handtiles)
+
+		possible_hands = []
+		#create all combinations without order
+		set_combinations_raw = list(itertools.combinations_with_replacement(self.full_com, 4))
+		for set_combination_raw in set_combinations_raw:
+		    four_trio_com = []
+		    for combination_raw in set_combination_raw:
+		    	for tile in combination_raw:
+		        	four_trio_com.append(tile)
+		    if self.tiles_subset_bool(handtiles, four_trio_com):
+		    	leftover = self.tiles_minus(handtiles, four_trio_com)
+		    	if leftover[0] == leftover[1]:
+		    		possible_hands.append(list(set_combination_raw) + [leftover])
+		    		print('good: {}'.format(possible_hands))
+
+		# special hands
+		if thirteen:
+			raw_tiles = self.tiles.copy()
+			if self.is_thirteenorphans():
+				return 1, [self.tiles]
+		return [len(possible_hands) > 0, possible_hands]
+
+	def legitimate_hands_old2(self, hiddentiles=None, thirteen=True):
+		if hiddentiles is None:
+			handtiles = self.tiles.copy()
+		else:
+			handtiles = hiddentiles.copy()
+		self.all_com(hiddentiles=handtiles)
+		possible_hands = []
+		# all normal hands
+		for comb_a in self.full_com:
+			for comb_b in self.full_com:
+				for comb_c in self.full_com:
+					for comb_d in self.full_com:
+						temp_com = comb_a + comb_b + comb_c + comb_d
+						if self.tiles_subset_bool(handtiles, temp_com):
+							leftover = self.tiles_minus(handtiles, temp_com)
+							if leftover[0] == leftover[1]:
+								repeateds = []
+								for possible_hand in possible_hands:
+									repeated = []
+									comb_ax, comb_bx, comb_cx, comb_dx, leftoverx = possible_hand										
+									for comb in [comb_a, comb_b, comb_c, comb_d]:
+										if comb in [comb_ax, comb_bx, comb_cx, comb_dx]:
+											repeated.append(True)
+										else:
+											repeated.append(False)
+									repeateds.append(all(repeated))
+									#print([comb_a, comb_b, comb_c, comb_d], repeated)
+								if not any(repeateds):
+									possible_hands.append([comb_a, comb_b, comb_c, comb_d, leftover])
+		# special hands
+		if thirteen:
+			raw_tiles = self.tiles.copy()
+			if self.is_thirteenorphans():
+				return 1, [self.tiles]
+		return [len(possible_hands) > 0, possible_hands]
+		
+	def legitimate_hands_old1(self, hiddentiles=None, thirteen=True):
 		if hiddentiles is None:
 			handtiles = self.tiles.copy()
 		else:
